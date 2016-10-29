@@ -187,7 +187,7 @@ class Code():
         return
 
     def save_image(self, pars, fit_peak = 'yes'):
-#        return
+        return
         import matplotlib.pyplot as plt
         x = np.array(self._x)
         x_plot = x/60. #back to minutes

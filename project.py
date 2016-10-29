@@ -10,14 +10,8 @@ class Project(object):
         self._project_name = project_name
         self._info = init.Info(init_file)
         self._path = init.Path(project_name, self._info)
-#        self._check_peak = check_peak
         self._csv = self._info.csv
         self._runlist = self._path.runlist_cal
-#        if self._check_peak:
-#            self._runlist = self._check_peak.runlist\
-#                            (self._runlist, self._path.runlist_file_cal)
-#            info = self._check_peak.info
-#        else:
         info = self._info
         self.get_CFdict()
         self._noise = noise.NoiseReduction(info)
@@ -104,15 +98,6 @@ class Project(object):
     def get_RTdict(self):
         self._RTdict = {}
         self.read_amdis()
-        if self._check_peak:
-            code = self._check_peak.code
-            for sample in self._RTdict:
-                try:
-                    code_value = self._RTdict[sample][code]
-                except KeyError:
-                    code_value = None
-                self._RTdict[sample].clear()
-                self._RTdict[sample][code] = code_value
         if self._info.min_fit:
             import backfill
             self._RTdict = backfill.bf(self, 
