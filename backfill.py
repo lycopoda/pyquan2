@@ -16,9 +16,6 @@ class Backfill():
                 self.check_code(code)
         else:
             self.check_code(self._code)
-        for sample in self._project.runlist:
-            print(self._project.RTdict[self._code])
-        sys.exit(2)
         return
 
     def check_code(self, code):

@@ -74,7 +74,7 @@ def quantify(project):
     return 
 
 def quantify_code(project, sample, code, cdf):
-    with get_ID(project, sample, code, project._library.mz(code)) as ID:
+    with get_ID(project, sample, code, project._lib.mz(code)) as ID:
         peak_fit = peak.Code(ID, cdf, project)
         peak_fit.area(noise=project.noise, fit_peak=project.fit_peak)
     return ID.ID
