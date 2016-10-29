@@ -1,26 +1,35 @@
 import sys
 
-def bf(project, threshold=3):
-    Backfill(project, threshold).RTdict
+def bf(project, code=None, threshold=3):
+    Backfill(project, threshold=threshold, code=code).RTdict()
     return
 
 class Backfill():
-    def __init__(self, project, threshold=3):
-        self._lib = project.lib
-        self._CFdict = project.CFdict
-        self._RTdict = project.RTdict
+    def __init__(self, project, threshold=3, code=None):
+        self._project = project
+        self._threshold = threshold
+        self._code = code
 
     def RTdict(self):
-        for code in self.lib:
-            if enough:
-                self.bf(code)
-                #update RTdict and Cfdict in project
+        if not self._code:
+            for code in self._project.lib.library:
+                self.check_code(code)
+        else:
+            self.check_code(self._code)
+        for sample in self._project.runlist:
+            print(self._project.RTdict[self._code])
+        sys.exit(2)
+        return
+
+    def check_code(self, code):
+        if self.enough(code):
+            self.bf(code)
         return
 
     def enough(self, code):
         count = 0
         for sample in self._project.runlist:
-            if code in RTDict[sample]:
+            if code in self._project.RTdict[sample]:
                 count += 1
         if count >= self._threshold:
             return True
@@ -29,20 +38,21 @@ class Backfill():
             
     def bf(self, code):
         for sample in self._project.runlist:
-            if not self._RTdict[sample][code]:
-                #calc RT
-                #updat RT and fit in project class
+            print(self._project.RTdict[sample][code])
+            if not self._project.RTdict[sample][code]:
+                print('get new RT')
+                RT_lib = self._project.lib.RT(code)
+                CF = self._project.CFdict[sample]
+                self._project._RTdict[sample][code] = \
+                ((RT_lib - CF[1]) / CF[0], 0)
+        return
+
 
 
                 
 
-def bf(project):
-    RTlist =  make_RTlist(project)
-    for code in Rtlist:
-        RT_lib = project.library.RT(code)
-        for sample in RTDict
 
-def bf(RTdict, CFdict, library, threshold=3):
+def bf_old(RTdict, CFdict, library, threshold=3):
     RTlist = make_RTlist (RTdict, threshold)
     print(RTlist)
     sys.exit(2)

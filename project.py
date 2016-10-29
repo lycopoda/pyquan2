@@ -58,6 +58,14 @@ class Project(object):
     def lib(self):
         return self._lib
 
+    @property
+    def CFdict(self):
+        return self._CFdict
+
+    @property
+    def RTdict(self):
+        return self._RTdict
+
     def mz(self, code):
         return self._lib._lib[code]['mz']
 
@@ -140,7 +148,7 @@ class Project_cp(Project):
         if not self._check_peak.sample:
             import backfill
             self._RTdict = backfill.bf(self, 
-                                       threshold=-1)
+                                       threshold=-1, code=code)
         print(self._RTdict)
         sys.exit(2)
         return
