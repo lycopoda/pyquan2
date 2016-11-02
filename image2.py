@@ -62,7 +62,19 @@ def image_plot():
     plt.show()
 
 class Plot(object):
-    def __init__(self, project
+    def __init__(self, project, sample, code):
+        self._project = project
+        self._sample = sample
+        self._code = code
+
+    def image(self):
+        fig = plt.figure()
+        fig.canvas.mpl_connect('key_press_event', key_event)
+        ax = fig.add_subplot(111)
+        x,y = plots[0]
+        ax.plot(x,y)
+        plt.show()
+
 
 class PeakList(object):
     def __init__(self, project):

@@ -2,8 +2,9 @@ import peak_fit, sys
 import matplotlib.pyplot as plt
 
 class NormFigures(object):
-    def __init__(self, project, sample, data):
-        self._project = project
+    def __init__(self, normalize, hdf5, sample):
+        self._norm = normalize
+        self._f = hdf5
         self._sample = sample
         self._data = data
         self._time = data._time[sample]
@@ -35,6 +36,8 @@ class NormFigures(object):
             baseline_lim = self._baseline[start:end]
             peak_lim = self._peakTIC[start:end] + baseline_lim
             self.create_image(time_lim, total_lim, baseline_lim, peak_lim, name)
+            print(self._peakTIC[start:end])
+            sys.exit(2)
         return
 
     def create_image(self, time, total, baseline, peak, name):
@@ -54,6 +57,8 @@ class NormFigures(object):
         self._peakTIC = self._emptyTIC
         for code in self._data._datadict[self._sample]:
             ID = self._datadict[self._sample][code]
+            print(ID['param'])
+            sys.exit(2)
             if ID['param']:
                 self._peakTIC += peak_fit.Fit.asym_peak\
                                  (self._time, ID['param']) 

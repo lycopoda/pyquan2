@@ -57,8 +57,6 @@ def quantify(project):
     project.get_RTdict()
     datalines = []
     ID = {}
-    if not project._check_peak:
-        datafiles.create_file(project)
     for sample in project.runlist:
         line = 'Quantify peaks in {0}: '.format(sample)
         print(line, end='', flush=True)
@@ -68,8 +66,8 @@ def quantify(project):
                 print('\r{0}{1}   \t\t'.format(line, code), end='', flush=True)
                 sys.stdout.flush()
                 ID[code] = quantify_code(project, sample, code, cdf)
-            with datafiles.HDF5(project.path.hdf5, sample, ID) as HDF5:
-                    HDF5.save()
+            with datafiles.HDF5(project.path.hdf5) as HDF5:
+                    HDF5.save(sample, ID)
             print('\r{0}finished   \t\t'.format(line), flush=True)
     return 
 
@@ -82,7 +80,9 @@ def quantify_code(project, sample, code, cdf):
 
 def main(project_name):
     warnings.simplefilter("error", OptimizeWarning)
-    quantify(project.Project(project_name))
+    proj = project.Project(project_name)
+    datafiles.create_file(proj)
+    quantify(proj)
     return 0
 
 if __name__=='__main__':

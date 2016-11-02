@@ -100,8 +100,7 @@ class Project(object):
         self.read_amdis()
         if self._info.min_fit:
             import backfill
-            self._RTdict = backfill.bf(self, 
-                                       threshold=self._info.min_fit)
+            backfill.bf(self, threshold=self._info.min_fit)
         return
 
     def read_amdis(self, code=None):
@@ -115,7 +114,7 @@ class Project(object):
 
 
 class Project_cp(Project):
-    def __init__(self, project_name, check_peak, init_file='pyquan.ini'):
+    def __init__(self, project_name, check_peak, init_file='check_peak.ini'):
         super().__init__(project_name, init_file)
         self._check_peak =  check_peak
 

@@ -35,7 +35,7 @@ class Backfill():
             
     def bf(self, code):
         for sample in self._project.runlist:
-            if not self._project.RTdict[sample][code]:
+            if not code in self._project.RTdict[sample]:
                 RT_lib = self._project.lib.RT(code)
                 CF = self._project.CFdict[sample]
                 self._project._RTdict[sample][code] = \

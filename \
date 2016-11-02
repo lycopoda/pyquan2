@@ -74,7 +74,7 @@ class HDF5(object):
             datadict[code] = dict.fromkeys(self._samplelist)
             for sample in self._samplelist:
                 try:
-                    data = self._f[sample][code][item].value
+                    data = np.array(self._f[sample][code].get(item))
                 except KeyError:
                     data = 'ND'
                 datadict[code][sample] = data

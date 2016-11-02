@@ -112,129 +112,33 @@ class Data(object):
         return            
 
 
-class WriteFiles(object):
-    def __init__(self, project):
-        self._makeline = project.csv.make_line
-        self._RTfile = project.path.RT_file
-        self._fitfile = project.path.fit_file
-        self._areafile = project.path.area_norm_file
-        self._codelist = []
-        self._samplelist = []
-
-    def write_RT(self, RTdict):
-        self.writedata('RT', RTdict, self._RTfile)
-        return
-
-    def write_fit(self, fitdict):
-        self.writedata('fit', fitdict, self._fitfile)
-        return
-
-    def write_area(self, areadict):
-        self.writedata('area_norm', areadict, self._areafile)
-        return
-
-    def writedata(self, item, datadict, filename):
-        with open(filename, 'w') as f:
-            f.write(self.header(item))
-            for code in self._codelist:
-                datalist = [code]
-                for sample in self._samplelist:
-                    datalist.append(datadict[code].get(sample, 'ND'))
-                f.write(self._makeline(datalist))
-        return
-
-    def header(self, item):
-        headerlist = [item] + self._samplelist
-        return self._makeline(headerlist)
-
 class Normalize(object):
     def __init__(self, project):
         print('Collect data')
         sys.stdout.flush()
         self._project = project
+        self._codelist = []
         self._mzratio = mzratio.CF(project)
+        self._data = Data(project, self)
         print('Write output files')
         sys.stdout.flush()
+        self._normfiles = normfiles.NormFiles(project, self)
+        self._normfiles.writefiles()
 
     def CF(self, code):
         return self._mzratio.CF(code)
 
     def writedata(self):
-        writefiles = WriteFiles(self._project)
-        with datafiles.HDF5(self._project.path.hdf5) as f:
-            f.get_project_data()
-            writefiles._samplelist = f.samplelist
-            writefiles._codelist = f.codelist
-            writefiles.write_RT(f.RTdict)
-            writefiles.write_fit(f.fitdict)
-            self._areadict = f.areadict
-        self.normalize()
-        writefiles.write_area(self._areadict)
+        files = normfiles.NormFiles(self._project, self)
+        files.writefiles()
         return
-
-    def normalize(self):
-        norm = self._project.info.norm_method
-        if norm == 'tic':
-            print('Normalization against TIC')
-            self.norm_tic()
-        elif norm == 'sum':
-            print('Normalization against sum')
-            self.norm_sum()
-        elif norm:
-            print('Normalization against {0}'.format(norm))
-            code = amdis.correct_code(norm)
-            if code in self._project.library:
-                self.norm_std(code)
-            else:
-                print('ERROR: code for internal standard not present')
-                print('Change norm_method in pyquan.ini')
-                sys.exit(2) 
-        if self._CFnorm:
-            for code in  self._areadict:
-                for sample in self._areadict[code]:
-                    try:
-                        self._areadict[code][sample] /=self._CFnorm[sample]
-                    except TypeError:
-                        pass
-        return
-
-    def norm_std(self, code):
-        self._CFnorm = {}
-        for samples in self._project.runlist:
-            try:
-                self._CFnorm[sample] = self._areadict[sample][code]
-            except KeyError:
-                print('ERROR: Internal standard not present in all samples')
-                print('Choose different standard or method in pyquan.ini')
-                sys.exit(2)
-        return
-    
-    def norm_sum(self):
-        self._CFnorm = dict.fromkeys(self._project.runlist, 0.)
-        for code in self._areadict:
-            for sample, area in self._areadict[code].items():
-                try:
-                    self._CFnorm[sample] += area
-                except TypeError:
-                    pass
-        return
-
-    def norm_tic(self):
-        self._CFnorm = {}
-        for sample in self._project.runlist:
-            self._CFnorm[sample] = sum(self._TIC[sample]) - \
-                                   sum(self._baseline[sample])
-        return            
-
-       
 
     def makefigures(self):
         print('Create output figures')
         sys.stdout.flush()
-        with datafiles.HDF5(self._project.path.hdf5) as f:
-            for sample in self._project.runlist:
-                figures = normfigures.NormFigures(self._project, sample, self._data)
-                figures.make_figures()
+        for sample in self._project.runlist:
+            figures = normfigures.NormFigures(self._project, sample, self._data)
+            figures.make_figures()
         print('\nFinished')
         return
 
