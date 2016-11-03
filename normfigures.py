@@ -2,11 +2,14 @@ import peak_fit, sys
 import matplotlib.pyplot as plt
 
 class NormFigures(object):
-    def __init__(self, normalize, hdf5, sample):
+    def __init__(self, normalize, sample, hdf5):
         self._norm = normalize
         self._f = hdf5
         self._sample = sample
-        self._data = data
+        self.getCDFdata()
+
+    def getCDFdata(self):
+        
         self._time = data._time[sample]
         self._baseline = data._baseline[sample]
         self._totalTIC = data._TIC[sample]

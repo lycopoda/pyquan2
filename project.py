@@ -131,6 +131,6 @@ class Project_cp(Project):
             self._RTdict[sample][code] = code_value
         if not self._check_peak.sample:
             import backfill
-            backfill.bf(self, threshold=-1, code=code)
+            backfill.bf(self, code=code)
         return
 

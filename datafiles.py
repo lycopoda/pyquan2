@@ -41,32 +41,66 @@ class HDF5(object):
     def save(self, sample, ID):
         fs = self._f[sample]
         for code in ID:
-            if code in self._fs:
+            if code in fs:
                 del fs[code]
             fcode = fs.create_group(code)
-            for item in ['area', 'RT', 'fit', 'real_peak','x', 'y']:
+            for item in ['area', 'RT', 'fit','x', 'y']:
                 if item in ID[code]:
                     data = ID[code][item]
                     fcode.create_dataset(item, data=data)
-            fparam = fcode.create_group('param')
             if 'param' in ID[code]:
+                fparam = fcode.create_group('param')
                 for peak in ID[code]['param']:
                     data=ID[code]['param'][peak]
-                    fparam.create_dataset(peak, data=peak)
+                    try:
+                        fparam.create_dataset(peak, data=data)
+                    except TypeError:
+                        pass
+            if 'real_y' in ID[code]:
+                freal = fcode.create_group('real_peak')
+                y, index = ID[code]['real_y']
+                freal.create_dataset('y', data=y)
+                freal.create_dataset('index', data=index)
         return
 
     #read data
 
     def get_project_data(self):
+        self.makelists()
+        self._RTdict = self.getdata('RT')
+        self._fitdict = self.getdata('fit')
+        self._areadict = self.getdata('area')
+        return
+
+    def makelists(self):
         self._samplelist = sorted(list(self._f.keys()))
         codeset = set()
         for sample in self._samplelist:
             [codeset.add(key) for key in self._f[sample].keys()]
         self._codelist = sorted(list(codeset))
-        self._RTdict = self.getdata('RT')
-        self._fitdict = self.getdata('fit')
-        self._areadict = self.getdata('area')
-        return
+
+
+
+    def getparam(self, sample, code=None):
+        if not code:
+            self.makelists()
+            codelist = self._codelist
+        else:
+            codelist = [code]
+        peakdict = {}
+        for code in codelist:
+            if code in self._f[sample]:
+                fc = self._f[sample][code]
+                print(peakdict[code]['param']['int'].value)
+                try:
+                    peakdict[code]['param'] = fc['param']['int'].value
+                except KeyError:
+                    try:
+                        peakdict[code]['real_x'] = fc['real_x'].value
+                        peakdict[code]['real_y'] = fc['real_y'].value
+                    except KeyError:
+                        pass
+        return peakdict
 
     def getdata(self, item):
         datadict = dict.fromkeys(self._codelist)

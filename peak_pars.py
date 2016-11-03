@@ -45,9 +45,10 @@ class Pars:
             self.func_right_peak()
             self.func_int_peak()
             for i in self._range_peak:
-                pars[i] = self.func_pars(self._range_peak[i])
+                if i[0]:
+                    pars[i] = self.func_pars(self._range_peak[i])
 #truncate time range of interest
-                x_peak, y_peak = self.func_truncate()
+            x_peak, y_peak = self.func_truncate()
         return pars, x_peak, y_peak
 
     @property
