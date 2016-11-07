@@ -63,8 +63,6 @@ class HDF5(object):
                 freal.create_dataset('index', data=index)
         return
 
-    #read data
-
     def get_project_data(self):
         self.makelists()
         self._RTdict = self.getdata('RT')
@@ -79,8 +77,6 @@ class HDF5(object):
             [codeset.add(key) for key in self._f[sample].keys()]
         self._codelist = sorted(list(codeset))
 
-
-
     def getparam(self, sample, code=None):
         if not code:
             self.makelists()
@@ -91,7 +87,7 @@ class HDF5(object):
         for code in codelist:
             if code in self._f[sample]:
                 fc = self._f[sample][code]
-                print(peakdict[code]['param']['int'].value)
+                peakdict[code] = {}
                 try:
                     peakdict[code]['param'] = fc['param']['int'].value
                 except KeyError:

@@ -1,4 +1,4 @@
-import datafiles, mzratio, CDF, sys, normfiles, normfigures, baseline
+import datafiles, mzratio, CDF, sys, normfiles, normfigures, baseline, peak_fit
 import project as proj
 import matplotlib.pyplot as plt
 
@@ -78,8 +78,6 @@ class MakeFigures(object):
         self._peakTIC = self._cdf.empty_TIC
         with datafiles.HDF5(self._project.path.hdf5) as f:
             peakparam = f.getparam(sample=self._sample)
-        print(peakparam)
-        sys.exit(2)
         for code in peakparam:
             try:
                 self._peakTIC += peak_fit.Fit.asym_peak(self._cdf.scan_time,
