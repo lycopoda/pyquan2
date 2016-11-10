@@ -12,6 +12,12 @@ class WriteFiles(object):
         self._samplelist = []
 
     def write_RT(self, RTdict):
+        for code in RTdict:
+            for sample in RTdict[code]:
+                try:
+                    RTdict[code][sample] /= 60.
+                except TypeError:
+                    pass
         self.writedata('RT', RTdict, self._RTfile)
         return
 
@@ -39,8 +45,9 @@ class WriteFiles(object):
 
 
 class MakeFigures(object):
-    def __init__(self, project, sample):
-        self._project = project
+    def __init__(self, normalize, sample):
+        self._CF = normalize.CF
+        self._project = normalize._project
         self._sample = sample
         self._cdf = CDF.CDF(sample)
         self._baseline = baseline.baseline_poly(self._cdf.scan_time,
@@ -79,13 +86,14 @@ class MakeFigures(object):
         with datafiles.HDF5(self._project.path.hdf5) as f:
             peakparam = f.getparam(sample=self._sample)
         for code in peakparam:
+            CF = self._CF(code)
             try:
                 self._peakTIC += peak_fit.Fit.asym_peak(self._cdf.scan_time,
-                peakparam[code]['param'])
+                        peakparam[code]['param']) * CF
             except KeyError:
                 try:
                     xs = peakparam[code]['real_x']
-                    y = peakparam[code]['real_y']
+                    y = peakparam[code]['real_y'] * CF
                     for i in range(xs[0],xs[1]):
                         self._peakTIC[i] += y[i]
                 except KeyError:
@@ -94,6 +102,7 @@ class MakeFigures(object):
         return
 
     def create_image(self, time, total, baseline, peak, name):
+        time/=60.
         plt.figure()
         plt.plot(time, total, 'k-')
         plt.plot(time, peak, 'r-')
@@ -110,10 +119,17 @@ class Normalize(object):
         print('Normalize peaks')
         sys.stdout.flush()
         self._project = project
-        self._mzratio = mzratio.CF(project)
+        self.getmzratio()
+
+    def getmzratio(self):
+        self._CF = {}
+        CF = mzratio.CF(self._project)
+        for code in self._project.lib.library:
+            self._CF[code] = CF.CF(code)
+        return
 
     def CF(self, code):
-        return self._mzratio.CF(code)
+        return self._CF[code]
 
     def writedata(self):
         print('Write output files')
@@ -132,6 +148,23 @@ class Normalize(object):
 
     def normalize(self):
         norm = self._project.info.norm_method
+        sampleset = set()
+        for code in self._areadict:
+            for sample in self._areadict[code]:
+                sampleset.add(sample)
+        if not [sample for sample in self._project.runlist if 
+                        sample in  sampleset]:
+            print('ERROR: Sample {0} '.format(sample) +
+                    'not in results, uncheck sample from' +
+                    'runlist, or rerun quantify.') 
+            sys.exit(2)
+        for code in self._areadict:
+            CF = self._CF[code]
+            for sample in self._areadict[code]:
+                try:
+                    self._areadict[code][sample] *= CF
+                except TypeError:
+                    pass
         if norm == 'tic':
             print('Normalization against TIC')
             self.norm_tic()
@@ -149,7 +182,7 @@ class Normalize(object):
                 sys.exit(2) 
         if self._CFnorm:
             for code in  self._areadict:
-                for sample in self._areadict[code]:
+                for sample in self._CFnorm:
                     try:
                         self._areadict[code][sample] /=self._CFnorm[sample]
                     except TypeError:
@@ -170,9 +203,9 @@ class Normalize(object):
     def norm_sum(self):
         self._CFnorm = dict.fromkeys(self._project.runlist, 0.)
         for code in self._areadict:
-            for sample, area in self._areadict[code].items():
+            for sample in self._CFnorm:
                 try:
-                    self._CFnorm[sample] += area
+                    self._CFnorm[sample] += self._areadict[code][sample]
                 except TypeError:
                     pass
         return
@@ -191,9 +224,10 @@ def main(project_name=None):
         project_name = analyse.get_project_name()
     project = proj.Project(project_name)
     project.read_library()
-    Normalize(project).writedata()
+    normalize = Normalize(project)
+    normalize.writedata()
     for sample in project.runlist:
-        MakeFigures(project, sample).make_figures()
+        MakeFigures(normalize, sample).make_figures()
     return 0 
 
 if __name__=='__main__':
