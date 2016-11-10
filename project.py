@@ -117,6 +117,20 @@ class Project_cp(Project):
     def __init__(self, project_name, check_peak, init_file='check_peak.ini'):
         super().__init__(project_name, init_file)
         self._check_peak =  check_peak
+        self.getrunlist()
+
+    def getrunlist(self):
+        sample = self._check_peak.sample
+        if sample != 'all':
+            if sample in self._runlist:
+                self._runlist = [sample]
+            else:
+                print('ERROR: {0} not in sample list of {1}'.\
+                        format(sample, self._project_name))
+                sys.exit(2)
+        else:
+            pass
+        return   
 
     def get_RTdict(self):
         self._RTdict = {}
