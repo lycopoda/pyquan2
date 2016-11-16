@@ -1,7 +1,7 @@
 '''This module show plots of the peaks, in black the original intensity data,
 in red the estimated peak of interest (either the fitted function, or part of
 the real data, and in blue the overlapping peaks (if present).'''
-import os, sys
+import os, sys, project
 from peak_fit import Fit
 from matplotlib import pyplot as plt
 from argparse import ArgumentParser
@@ -39,7 +39,7 @@ def key_event(e):
     elif e.key =='c':
         #update and open check_peak init file
         #save init file
-        e.key =='c':
+        pass
             #run check_peak
             #update peak list
             #open at same peak
@@ -84,7 +84,7 @@ class PeakList(object):
     def create_list(self):
         self._peak_list = []
         with open(self._project.path.hdf5, 'r') as data:
-            for code in self._project.library:
+            for code in self._project.lib:
                 for sample in self._project.runlist:
                     self._peak_list.append((sample, code))
         return
@@ -123,18 +123,23 @@ def correct_new(project, sample, code):
 
     
 
-def main(project_name=None, sample=None, code=None):
+def main(project_name):
     if not project_name:
         project_name = get_info()
-    project = project.Project(project_name)
+    proj = project.Project(project_name)
     #create peak list, ordered by library RT and sample list
-    peak_list = PeakList(project_name)
+    peak_list = PeakList(proj)
+    print(peak_list)
+    sys.exit(2)
     #search for memory file; if present, get index of code and sample
     #otherwise, give first sample and code
-    plot = Plot(project, sample, code)
+    plot = Plot(proj, sample, code)
     plots.image()
     return 0
 
 if __name__=='__main__':
+    import analyse
+    project_name = analyse.get_project_name()
+    main(project_name)
     status = main()
     sys.exit(status)

@@ -121,7 +121,7 @@ class Project_cp(Project):
 
     def getrunlist(self):
         sample = self._check_peak.sample
-        if sample != 'all':
+        if sample:
             if sample in self._runlist:
                 self._runlist = [sample]
             else:
@@ -137,14 +137,17 @@ class Project_cp(Project):
         self.read_amdis()
         code = self._check_peak.code
         for sample in self._RTdict:
-            try:
-                code_value = self._RTdict[sample][code]
-            except KeyError:
-                code_value = None
+            if self._check_peak.RT:
+                code_value = self._check_peak.RT
+            else:
+                try:
+                    code_value = self._RTdict[sample][code]
+                except KeyError:
+                    code_value = None
             self._RTdict[sample].clear()
-            self._RTdict[sample][code] = code_value
+            self._RTdict[sample][code] = (code_value, 0)
         if not self._check_peak.sample:
-            import backfill
+            print('backfill')
             backfill.bf(self, code=code)
         return
 
