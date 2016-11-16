@@ -138,16 +138,16 @@ class Project_cp(Project):
         code = self._check_peak.code
         for sample in self._RTdict:
             if self._check_peak.RT:
-                code_value = self._check_peak.RT
+                code_value = (self._check_peak.RT, 0)
             else:
                 try:
                     code_value = self._RTdict[sample][code]
                 except KeyError:
-                    code_value = None
+                    code_value = (None, 0)
             self._RTdict[sample].clear()
-            self._RTdict[sample][code] = (code_value, 0)
+            self._RTdict[sample][code] = code_value
         if not self._check_peak.sample:
-            print('backfill')
+            import backfill
             backfill.bf(self, code=code)
         return
 
