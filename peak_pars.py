@@ -86,8 +86,8 @@ class Pars:
     def correct_range(self, start, end, n=4):
         dif = end -start
         if dif <= n:
-            start = start - dif/2 - 1
-            end = end + dif/2 + 1
+            start = start - int(dif/2) - 1
+            end = end + int(dif/2) + 1
         return start, end
 
     def func_pars(self, peak):

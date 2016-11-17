@@ -65,13 +65,14 @@ class MakeFigures(object):
         self.save_image(lim)
 
     def save_image(self, lim):
-        x_max = max(self._cdf.scan_time)
-        l_time = len(self._cdf.scan_time)
+        time = self._cdf.scan_time / 60.
+        x_max = max(time)
+        l_time = len(time)
         for i in lim:
             name = self._project.path.norm_fig_file(self._sample,str(i))
             start = int(lim[i][0] * l_time)
             end = int(lim[i][1] * l_time)
-            time_lim = self._cdf.scan_time[start:end]
+            time_lim = time[start:end]
             total_lim = self._cdf.total_TIC[start:end]
             baseline_lim = self._baseline[start:end]
             peak_lim = self._peakTIC[start:end] + baseline_lim
@@ -102,7 +103,6 @@ class MakeFigures(object):
         return
 
     def create_image(self, time, total, baseline, peak, name):
-        time/=60.
         plt.figure()
         plt.plot(time, total, 'k-')
         plt.plot(time, peak, 'r-')
