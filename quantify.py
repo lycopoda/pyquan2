@@ -59,7 +59,7 @@ def quantify(project):
     ID = {}
     for sample in project.runlist:
         line = 'Quantify peaks in {0}: '.format(sample)
-        print(line, end='', flush=True)
+        print(line, end=' ', flush=True)
         with CDF.CDF(sample) as cdf:
             cdf.import_data()
             for code in project._RTdict[sample]:
@@ -81,6 +81,7 @@ def quantify_code(project, sample, code, cdf):
 def main(project_name):
     warnings.simplefilter("error", OptimizeWarning)
     proj = project.Project(project_name)
+    proj.prepare_quantify()
     datafiles.create_file(proj)
     quantify(proj)
     return 0

@@ -86,16 +86,22 @@ def batch(path):
     """Separates an AMDIS batch file into a file for each sample.
     These samples are stored in an amdis folder, with the project  folder."""
     data_dict =  {}
-    comp = AmdisCompile()
+    comp = Compile()
     with open(path.amdis_file, 'r') as data:
         header = data.readline()
         sample_dict = {}
-    for line in data:
-            sample = read_line_batch(line, comp).lower()
-            if not sample in sample_dict:
-                sample_dict[sample] = []
-            sample_dict[sample].append(line)
-    return sample_dict, header
+        for line in data:
+                sample = read_line_batch(line, comp).lower()
+                if not sample in sample_dict:
+                    sample_dict[sample] = []
+                sample_dict[sample].append(line)
+    for sample in sample_dict:
+        fp = path.amdis_file_sample(sample)
+        with open(fp, 'w') as sf:
+            sf.write(header)
+            for line in sample_dict[sample]:
+                sf.write(line)
+    return
             
 def read_line_batch(line, comp):
     info = line.split("\t")

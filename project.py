@@ -13,11 +13,6 @@ class Project(object):
         self._csv = self._info.csv
         self._runlist = self._path.runlist_cal
         info = self._info
-        self.get_CFdict()
-        self._noise = noise.NoiseReduction(info)
-        self._fit_peak = info.fit_peak
-        self._param = pars.Pars(info)
-        self.create_dir()
         warnings.simplefilter('error', OptimizeWarning)
 
     @property
@@ -62,6 +57,17 @@ class Project(object):
 
     def mz(self, code):
         return self._lib._lib[code]['mz']
+
+    def prepare_quantify(self): 
+        self.get_CFdict()
+        self._noise = noise.NoiseReduction(self._info)
+        self._fit_peak = self._info.fit_peak
+        self._param = pars.Pars(self._info)
+        return
+        
+    def prepare_calibrate(self):
+        self.create_dir()
+        return
 
     def create_dir(self):
         dir_list = ['project_dir', 'amdis_dir', 'align_dir', 'data_dir',
