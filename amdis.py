@@ -49,12 +49,12 @@ def correct_code(code):
             break
     return code
 
-def read_intensity(project):
+def read_intensity(amdis_path, info):
     """Reads AMDIS library, and returns a dictionary with for each
     compound the intensity per mass.
     """
     intensity = {}
-    with open(project.path.library_amdis, 'r', encoding='latin-1') as amdis:
+    with open(amdis_path, 'r', encoding='latin-1') as amdis:
         for line in amdis:
             code, compound = get_compound(line)
             if code:
@@ -62,7 +62,7 @@ def read_intensity(project):
                     intensity[amdis_code._code]=amdis_code.intensity 
                 except:
                     pass
-                amdis_code = AmdisCode(project, code)
+                amdis_code = AmdisCode(info, code)
             elif line[0]=='(':
                 amdis_code.read_line(line)
         if amdis_code:
@@ -168,10 +168,10 @@ class AmdisCode(object):
     for each m/z.
     """
 
-    def __init__(self, project, code):
+    def __init__(self, info, code):
         self._code = code
         self._intensity = {}
-        self._mzlim = project.info.mass_limits
+        self._mzlim = info.mass_limits
         self._comp = Compile()
         
 
